@@ -75,7 +75,7 @@ export const ComponentCard = ({ component, onClick }) => {
           {formatResourceName(component.resource_id)}
         </h3>
         <p className="text-center text-sm text-gray-600">
-          {component.usage} {component.category_name?.toLowerCase().includes('water') ? 'Liters' : 'kWh'}
+          {component.usage} {component.category_name?.toLowerCase().includes('water') ? 'kWh' : 'liters'}
         </p>
         <p className="text-center text-sm mt-1">
           {component.building_name}
