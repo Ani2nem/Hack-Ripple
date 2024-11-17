@@ -41,4 +41,13 @@ class UsageSession(db.Model):
 
     def __repr__(self):
         return f"<UsageSession(resource_id={self.resource_id}, start_time={self.start_time}, end_time={self.end_time})>"
+    
+class Reminder(db.Model):
+    __tablename__ = 'reminders'
+
+    id = db.Column(db.Integer, primary_key=True)
+    task_name = db.Column(db.String(255), nullable=False)
+    due_date = db.Column(db.Date, nullable=False)
+    status = db.Column(db.String(50), nullable=False)
+    building_id = db.Column(db.Integer, db.ForeignKey('buildings.id'), nullable=False)
  

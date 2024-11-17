@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify
+from models import db, Reminder
+
 
 reminder_bp = Blueprint('reminders', __name__)
 
@@ -11,11 +13,10 @@ def get_sorted_reminders_by_building(building_id):
     response = [
         {
             "id": reminder.id,
-            "title": reminder.title,
-            "description": reminder.description,
+            "title": reminder.task_name,
             "due_date": reminder.due_date.strftime('%Y-%m-%d %H:%M:%S'),
             "status": reminder.status,
-            "resource_id": reminder.resource_id
+            "priority":reminder.priority
         }
         for reminder in reminders
     ]

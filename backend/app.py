@@ -6,9 +6,11 @@ from routes.buildings import building_bp
 from routes.resources import resource_bp
 from routes.reminders import reminder_bp
 from routes.usage_sessions import usage_session_bp
+from flask_cors import CORS
 
 # Initialize the Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Load configuration
 app.config.from_object(Config)
