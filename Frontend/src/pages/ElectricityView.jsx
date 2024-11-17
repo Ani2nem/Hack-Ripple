@@ -78,7 +78,7 @@ const CriticalComponentCard = ({ component, onClick }) => {
             {getResourceName(component.resource_id)}
           </h4>
           <p className="text-sm text-gray-600">
-            Usage: {component.usage} Liters
+            Usage: {component.usage} kWh
           </p>
           <p className={text}>
             {component.percent_over <= 0 

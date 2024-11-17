@@ -55,6 +55,11 @@ export const ComponentCard = ({ component, onClick }) => {
       .join(' ');
   };
 
+  const getUnit = (categoryName) => {
+    const waterCategories = ['faucet', 'fountain', 'flush', 'water'];
+    return waterCategories.includes(categoryName?.toLowerCase()) ? 'liters' : 'kWh';
+  };
+
   return (
     <Card 
       className={`
@@ -75,7 +80,7 @@ export const ComponentCard = ({ component, onClick }) => {
           {formatResourceName(component.resource_id)}
         </h3>
         <p className="text-center text-sm text-gray-600">
-          {component.usage} {component.category_name?.toLowerCase().includes('water') ? 'kWh' : 'liters'}
+          {component.usage} {getUnit(component.category_name)}
         </p>
         <p className="text-center text-sm mt-1">
           {component.building_name}

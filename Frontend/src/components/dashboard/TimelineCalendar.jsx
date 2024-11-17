@@ -54,7 +54,7 @@ export const TimelineCalendar = ({ data }) => {
                     ${getCellColor(data[day], hour)}
                     ${getTextColor(data[day], hour)}`}
                 >
-                  {getCellText(data[day], hour)}
+                  
                 </td>
               ))}
             </tr>

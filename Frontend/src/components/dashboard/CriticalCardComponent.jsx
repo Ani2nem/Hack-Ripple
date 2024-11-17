@@ -1,6 +1,11 @@
 const CriticalComponentCard = ({ component, onClick }) => {
     const { background, text } = getResourceStatus(component.percent_over);
     
+    const getUnit = (categoryName) => {
+      const waterCategories = ['faucet', 'fountain', 'flush', 'water'];
+      return waterCategories.includes(categoryName?.toLowerCase()) ? 'liters' : 'kWh';
+    };
+    
     return (
       <Card 
         className={`${background} cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg border`}
@@ -13,7 +18,7 @@ const CriticalComponentCard = ({ component, onClick }) => {
             </div>
             <h4 className="font-semibold text-gray-900">{component.resource_id}</h4>
             <p className="text-sm text-gray-600">
-              Usage: {component.usage} Liters
+              Usage: {component.usage} {getUnit(component.category_name)}
             </p>
             <p className={text}>
               {component.percent_over <= 0 
