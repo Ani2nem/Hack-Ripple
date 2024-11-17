@@ -1,7 +1,7 @@
 // src/pages/WaterView.jsx
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
-import { Droplet, ArrowLeft } from 'lucide-react';
+import { Droplet, GlassWater, Tv, Fan, Lightbulb, ArrowLeft} from 'lucide-react';
 import { TimelineCalendar } from '../components/dashboard/TimelineCalendar';
 import BuildingSelector from '../components/common/BuildingSelector';
 import { 
@@ -17,9 +17,17 @@ const getCategoryIcon = (category) => {
     case 'faucet':
       return <Droplet className="w-12 h-12" />;
     case 'fountain':
-      return <Droplet className="w-12 h-12 rotate-45" />;
+      return <GlassWater className="w-16 h-16 mx-auto" />;
     case 'flush':
       return <Droplet className="w-12 h-12 rotate-180" />;
+    case 'appliances':
+        return <Tv className="w-16 h-16 mx-auto" />;
+    case 'hvac system':
+    case 'hvac':
+        return <Fan className="w-16 h-16 mx-auto" />;
+    case 'lighting':
+    case 'lights':
+        return <Lightbulb className="w-16 h-16 mx-auto" />;
     default:
       return <Droplet className="w-12 h-12" />;
   }

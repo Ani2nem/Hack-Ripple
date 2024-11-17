@@ -1,7 +1,7 @@
 // src/components/dashboard/ComponentCard.jsx
 import React from 'react';
 import { Card, CardContent } from '../ui/Card';
-import { Fan, Lightbulb, Droplets } from 'lucide-react';
+import { Fan, Lightbulb, Droplet, GlassWater, Tv, Waves} from 'lucide-react';
 
 const getIcon = (name) => {
   switch (name.toLowerCase()) {
@@ -14,9 +14,13 @@ const getIcon = (name) => {
     case 'water system':
     case 'water':
     case 'faucet':
+      return <Droplet className="w-16 h-16 mx-auto" />;
     case 'fountain':
+      return <GlassWater className="w-16 h-16 mx-auto" />;
     case 'flush':
-      return <Droplets className="w-16 h-16 mx-auto" />;
+      return <Droplet className="w-16 h-16 mx-auto" />;
+    case 'appliances':
+      return <Tv className="w-16 h-16 mx-auto" />;
     default:
       return null;
   }

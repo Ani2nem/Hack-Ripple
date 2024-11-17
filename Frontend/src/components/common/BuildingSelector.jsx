@@ -4,7 +4,8 @@ import React from 'react';
 const buildings = [
   { id: 1, name: 'Building A' },
   { id: 2, name: 'Building B' },
-  { id: 3, name: 'Building C' }
+  { id: 3, name: 'Building C' },
+  { id: 4, name: 'Building D' }
   // Add more buildings as needed
 ];
 
