@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import ENUM
+
 
 db = SQLAlchemy()
 
@@ -27,9 +29,6 @@ class Resource(db.Model):
     usage = db.Column(db.Float, default=0.0)
     goal = db.Column(db.Float, default=0.0)
 
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
 
 # UsageSession Model
 class UsageSession(db.Model):
@@ -50,4 +49,13 @@ class Reminder(db.Model):
     due_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(50), nullable=False)
     building_id = db.Column(db.Integer, db.ForeignKey('buildings.id'), nullable=False)
+    priority = db.Column(
+        ENUM('low', 'medium', 'high', name='priority_levels', create_type=False),
+        nullable=False,
+        default='medium'
+    )  # Priority column with ENUM for levels
+
+    # Relationships
+    # building = db.relationship('Building', backref=db.backref('reminders', lazy=True))
+    
  
