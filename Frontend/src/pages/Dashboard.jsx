@@ -182,7 +182,8 @@ const Dashboard = () => {
             reminders={reminders.map(reminder => ({
               id: reminder.id,
               item: reminder.title,
-              status: reminder.status.toLowerCase()
+              status: reminder.status.toLowerCase(),
+              priority: reminder.priority.toLowerCase(), // Include priority here
             }))}
           />
         </div>
