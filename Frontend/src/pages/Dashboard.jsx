@@ -183,7 +183,8 @@ const Dashboard = () => {
               id: reminder.id,
               item: reminder.title,
               status: reminder.status.toLowerCase(),
-              priority: reminder.priority.toLowerCase(), // Include priority here
+              priority: reminder.priority.toLowerCase(),
+              dueDate: new Date(reminder.due_date).toLocaleDateString(),// Include priority here
             }))}
           />
         </div>

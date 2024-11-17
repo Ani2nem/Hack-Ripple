@@ -191,7 +191,7 @@ const ElectricityView = ({ onBack, selectedBuilding }) => {
                 key={`${category.building_id}-${category.category_name}`}
                 category={category.category_name}
                 usage={category.total_usage}
-                thresholdScore={category.percent_difference / 100}
+                thresholdScore={category.percent_difference }
             />
             ))}
         </div>

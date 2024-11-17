@@ -23,6 +23,10 @@ export const MaintenanceReminders = ({ reminders }) => {
                   }`}
                 />
                 <span>{reminder.title || reminder.item}</span>
+              
+                <span className="text-sm text-gray-600">
+                  Due: {reminder.dueDate || 'N/A'}
+                </span>
               </div>
             );
           })}
