@@ -1,10 +1,9 @@
-// src/components/dashboard/ComponentCard.jsx
 import React from 'react';
 import { Card, CardContent } from '../ui/Card';
 import { Fan, Lightbulb, Droplet, GlassWater, Tv, Waves} from 'lucide-react';
 
 const getIcon = (name) => {
-  switch (name.toLowerCase()) {
+  switch (name?.toLowerCase()) {
     case 'hvac system':
     case 'hvac':
       return <Fan className="w-16 h-16 mx-auto" />;
@@ -47,6 +46,15 @@ export const ComponentCard = ({ component, onClick }) => {
 
   const statusColors = getStatusColor(component.status);
 
+  // Safely handle the resource ID formatting
+  const formatResourceName = (resourceId) => {
+    if (!resourceId) return 'Unknown Resource';
+    return resourceId
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <Card 
       className={`
@@ -63,7 +71,9 @@ export const ComponentCard = ({ component, onClick }) => {
         <div className={`${statusColors.icon} mb-2`}>
           {getIcon(component.category_name)}
         </div>
-        <h3 className="text-center font-semibold">{component.category_name}</h3>
+        <h3 className="text-center font-semibold">
+          {formatResourceName(component.resource_id)}
+        </h3>
         <p className="text-center text-sm text-gray-600">
           {component.usage} {component.category_name?.toLowerCase().includes('water') ? 'Liters' : 'kWh'}
         </p>
