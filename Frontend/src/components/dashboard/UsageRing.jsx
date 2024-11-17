@@ -14,7 +14,9 @@ export const UsageRing = ({ type, usage, threshold }) => {
   // Scale the fill to ensure gap at high percentages
   // At 100% usage, the ring will be 95% filled (adjust scaleFactor to change this)
   const scaleFactor = 0.97;
-  const fillAmount = Math.min(percentage, 100) / 100 * circumference * scaleFactor;
+  //const fillAmount = Math.min(percentage, 100) / 100 * circumference * scaleFactor;
+  const fillAmount = Math.min(percentage, 100) / 100 * circumference;
+
   const dashArray = `${fillAmount} ${circumference}`;
   
   // Get color based on how close we are to threshold
@@ -65,16 +67,17 @@ export const UsageRing = ({ type, usage, threshold }) => {
         </svg>
         <div className="absolute inset-0 flex items-center justify-center flex-col">
           <span className={`text-2xl font-bold ${isSaving ? 'text-green-600' : 'text-red-600'}`}>
-            {costDifference === 0 ? 
-              '$0.00' : 
-              `${isSaving ? '+' : '-'}$${savingsDisplay}`
-            }
+          {costDifference === 0 ? 
+  'At threshold' : 
+  `${isSaving ? '+' : '-'}$${savingsDisplay}`
+}
+
           </span>
           <span className="text-sm text-gray-500">{type}</span>
           <span className="text-xs text-gray-400 mt-1">
             {percentage > 100 ? 
-              `${(percentage - 100).toFixed(1)}% over` : 
-              `${(100 - percentage).toFixed(1)}% under`
+              `${(percentage - 100,0).toFixed(1)}% over` : 
+              `${(100 - percentage,0).toFixed(1)}% under`
             }
           </span>
           <span className="text-xs text-gray-400">
