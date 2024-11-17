@@ -75,7 +75,7 @@ const Dashboard = () => {
 
       {/* Critical Components */}
       <section>
-        <h2 className="text-2xl font-bold mb-4">Critical Components</h2>
+        <h2 className="text-2xl font-bold mb-4">Critical Resources</h2>
         <div className="grid grid-cols-3 gap-6">
           <ComponentCard 
             component={{
