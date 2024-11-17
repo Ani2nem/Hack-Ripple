@@ -27,7 +27,10 @@ export const UsageRing = ({ type, usage, threshold, savings }) => {
         </svg>
         <div className="absolute inset-0 flex items-center justify-center flex-col">
           <span className="text-2xl font-bold">
-            {savings > 0 ? '+' : '-'}${Math.abs(savings)}
+            {savings === 0 ? 
+              `$0` : 
+              `${savings > 0 ? '+' : '-'}$${Math.abs(savings)}`
+            }
           </span>
           <span className="text-sm text-gray-500">{type}</span>
         </div>

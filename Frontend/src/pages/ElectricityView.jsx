@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+// src/pages/ElectricityView.jsx
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Fan, Lightbulb, Power, Cpu, ArrowLeft } from 'lucide-react';
 import { TimelineCalendar } from '../components/dashboard/TimelineCalendar';
+import BuildingSelector from '../components/common/BuildingSelector';
+import { 
+  fetchCategorySummary, 
+  fetchCriticalResources, 
+  fetchResourceUsage,
+  formatUsageData,
+  getResourceStatus 
+} from '../services/api';
 
-// Helper functions remain the same
 const getCategoryIcon = (category) => {
   switch (category.toLowerCase()) {
     case 'lights':
@@ -17,306 +25,197 @@ const getCategoryIcon = (category) => {
   }
 };
 
-const getStatusColor = (thresholdScore) => {
-  if (thresholdScore >= 0.8) return 'bg-red-100 text-red-600';
-  if (thresholdScore >= 0.6) return 'bg-yellow-100 text-yellow-600';
-  return 'bg-green-100 text-green-600';
-};
-
-// CategoryCard component
 const CategoryCard = ({ category, usage, thresholdScore }) => {
-  const statusColor = getStatusColor(thresholdScore);
+  const { background, text } = getResourceStatus(thresholdScore);
   
   return (
-    <Card className={`${statusColor} transition-all duration-200`}>
+    <Card className={`${background} transition-all duration-200 border`}>
       <CardContent className="p-6">
         <div className="flex flex-col items-center space-y-4">
-          {getCategoryIcon(category)}
-          <h3 className="text-xl font-semibold">{category}</h3>
-          <p className="text-sm">Usage: {usage} kWh</p>
-          <p className="text-sm">Threshold Score: {(thresholdScore * 100).toFixed(1)}%</p>
+          <div className={text}>
+            {getCategoryIcon(category)}
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900">{category}</h3>
+          <p className="text-sm text-gray-600">
+            Usage: {usage} kWh
+          </p>
+          <p className={text}>
+            {thresholdScore <= 0 
+              ? `${Math.abs(thresholdScore).toFixed(1)}% Below Threshold`
+              : `${thresholdScore.toFixed(1)}% Over Threshold`
+            }
+          </p>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-// CriticalComponentCard component
 const CriticalComponentCard = ({ component, onClick }) => {
-  const statusColor = getStatusColor(component.thresholdScore);
+  const { background, text } = getResourceStatus(component.percent_over);
   
   return (
     <Card 
-      className={`${statusColor} cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg`}
+      className={`${background} cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg border`}
       onClick={() => onClick(component)}
     >
       <CardContent className="p-4">
         <div className="flex flex-col items-center space-y-2">
-          {getCategoryIcon(component.category)}
-          <h4 className="font-semibold">{component.name}</h4>
-          <p className="text-sm">Usage: {component.usage} kWh</p>
-          <p className="text-sm">Threshold: {(component.thresholdScore * 100).toFixed(1)}%</p>
+          <div className={text}>
+            {getCategoryIcon(component.category_name)}
+          </div>
+          <h4 className="font-semibold text-gray-900">{component.category_name}</h4>
+          <p className="text-sm text-gray-600">
+            Usage: {component.usage} kWh
+          </p>
+          <p className={text}>
+            {component.percent_over <= 0 
+              ? `${Math.abs(component.percent_over).toFixed(1)}% Below Threshold`
+              : `${component.percent_over.toFixed(1)}% Over Threshold`
+            }
+          </p>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-const ElectricityView = ({ onBack }) => {
-    const [selectedComponent, setSelectedComponent] = useState(null);
-  
-    // Sample data definitions
-    const sampleCategories = [
-      { id: 1, category: 'Lights', usage: 1200, thresholdScore: 0.85 },
-      { id: 2, category: 'HVAC', usage: 2500, thresholdScore: 0.65 },
-      { id: 3, category: 'Appliances', usage: 800, thresholdScore: 0.45 }
-    ];
-  
-    const sampleComponents = [
-      { id: 1, name: 'Light Section A', category: 'Lights', usage: 500, thresholdScore: 0.9 },
-      { id: 2, name: 'HVAC Zone 1', category: 'HVAC', usage: 1200, thresholdScore: 0.8 }
-    ];
-  
-    // Sample timeline data
-    const timelineData = selectedComponent ? {
-      'Sun': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 0 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 1 },
-        13: { electricity: 1 },
-        14: { electricity: 1 },
-        15: { electricity: 1 },
-        16: { electricity: 1 },
-        17: { electricity: 1 },
-        18: { electricity: 1 },
-        19: { electricity: 0 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
-      },
-      'Mon': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 1 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 0 },
-        13: { electricity: 1 },
-        14: { electricity: 1 },
-        15: { electricity: 1 },
-        16: { electricity: 1 },
-        17: { electricity: 1 },
-        18: { electricity: 1 },
-        19: { electricity: 1 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
-      },
-      'Tue': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 1 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 1 },
-        13: { electricity: 1 },
-        14: { electricity: 1 },
-        15: { electricity: 1 },
-        16: { electricity: 1 },
-        17: { electricity: 1 },
-        18: { electricity: 0 },
-        19: { electricity: 0 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
-      },
-      'Wed': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 1 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 1 },
-        13: { electricity: 1 },
-        14: { electricity: 1 },
-        15: { electricity: 1 },
-        16: { electricity: 1 },
-        17: { electricity: 1 },
-        18: { electricity: 1 },
-        19: { electricity: 0 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
-      },
-      'Thu': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 1 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 1 },
-        13: { electricity: 1 },
-        14: { electricity: 1 },
-        15: { electricity: 1 },
-        16: { electricity: 1 },
-        17: { electricity: 1 },
-        18: { electricity: 1 },
-        19: { electricity: 0 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
-      },
-      'Fri': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 1 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 0 },
-        13: { electricity: 1 },
-        14: { electricity: 1 },
-        15: { electricity: 1 },
-        16: { electricity: 1 },
-        17: { electricity: 1 },
-        18: { electricity: 0 },
-        19: { electricity: 0 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
-      },
-      'Sat': {
-        0: { electricity: 0 },
-        1: { electricity: 0 },
-        2: { electricity: 0 },
-        3: { electricity: 0 },
-        4: { electricity: 0 },
-        5: { electricity: 0 },
-        6: { electricity: 1 },
-        7: { electricity: 1 },
-        8: { electricity: 1 },
-        9: { electricity: 1 },
-        10: { electricity: 1 },
-        11: { electricity: 1 },
-        12: { electricity: 1 },
-        13: { electricity: 0 },
-        14: { electricity: 0 },
-        15: { electricity: 0 },
-        16: { electricity: 0 },
-        17: { electricity: 0 },
-        18: { electricity: 0 },
-        19: { electricity: 0 },
-        20: { electricity: 0 },
-        21: { electricity: 0 },
-        22: { electricity: 0 },
-        23: { electricity: 0 }
+const ElectricityView = ({ onBack, selectedBuilding }) => {
+  const [categories, setCategories] = useState([]);
+  const [criticalResources, setCriticalResources] = useState([]);
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [resourceUsage, setResourceUsage] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [categoriesData, resourcesData] = await Promise.all([
+          fetchCategorySummary('electrical', selectedBuilding),
+          fetchCriticalResources('electrical', selectedBuilding)
+        ]);
+
+        setCategories(categoriesData);
+        setCriticalResources(resourcesData.filter(resource => 
+          resource.building_id === selectedBuilding
+        ));
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching electricity data:', err);
+      } finally {
+        setIsLoading(false);
       }
-    } : {};
+    };
+
+    fetchData();
+  }, [selectedBuilding]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [categoriesData, resourcesData] = await Promise.all([
+          fetchCategorySummary('electrical', selectedBuilding), // or 'water' for WaterView
+          fetchCriticalResources('electrical', selectedBuilding)  // or 'water' for WaterView
+        ]);
   
-    const handleComponentSelect = (component) => {
-      setSelectedComponent(component);
-      // Here you would typically fetch the component's timeline data
-      // fetchComponentTimeline(component.id);
+        setCategories(categoriesData); // Store all categories
+        setCriticalResources(resourcesData.filter(resource => 
+          resource.building_id === selectedBuilding
+        ));
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching data:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
   
+    fetchData();
+  }, [selectedBuilding]);
+
+  if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl font-semibold">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl font-semibold text-red-600">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
         <button 
           onClick={onBack}
-          className="flex items-center space-x-2 mb-6 text-gray-600 hover:text-gray-900"
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Back to Dashboard</span>
         </button>
-  
-        {/* Category Overview Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {sampleCategories.map(category => (
-            <CategoryCard key={category.id} {...category} />
+        <BuildingSelector 
+          selectedBuilding={selectedBuilding}
+          onBuildingChange={() => {}}
+          disabled={true}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {categories
+            .filter(category => category.building_id === selectedBuilding)
+            .map(category => (
+            <CategoryCard
+                key={`${category.building_id}-${category.category_name}`}
+                category={category.category_name}
+                usage={category.total_usage}
+                thresholdScore={category.percent_difference / 100}
+            />
+            ))}
+        </div>
+
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Critical Resources</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {criticalResources.map(resource => (
+            <CriticalComponentCard
+              key={resource.resource_id}
+              component={resource}
+              onClick={setSelectedResource}
+            />
           ))}
         </div>
-  
-        {/* s Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Critical Resources</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sampleComponents.map(component => (
-              <CriticalComponentCard
-                key={component.id}
-                component={component}
-                onClick={handleComponentSelect}
-              />
-            ))}
-          </div>
-        </section>
-  
-        {/* Critical Times Section */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">
-            Critical Times
-            {selectedComponent && <span className="text-lg font-normal ml-2">- {selectedComponent.name}</span>}
-          </h2>
-          {selectedComponent ? (
-            <TimelineCalendar data={timelineData} />
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              Select a component to view its active times
-            </div>
+      </section>
+
+      <section>
+        <h2 className="text-2xl font-bold mb-6">
+          Critical Times
+          {selectedResource && (
+            <span className="text-lg font-normal ml-2">
+              - {selectedResource.building_name} {selectedResource.category_name}
+            </span>
           )}
-        </section>
-      </div>
-    );
-  };
-  
-  export default ElectricityView;
+        </h2>
+        {selectedResource ? (
+          <TimelineCalendar data={resourceUsage} />
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            Select a component to view its active times
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
+export default ElectricityView;

@@ -6,10 +6,16 @@ import { Fan, Lightbulb, Droplets } from 'lucide-react';
 const getIcon = (name) => {
   switch (name.toLowerCase()) {
     case 'hvac system':
+    case 'hvac':
       return <Fan className="w-16 h-16 mx-auto" />;
     case 'lighting':
+    case 'lights':
       return <Lightbulb className="w-16 h-16 mx-auto" />;
     case 'water system':
+    case 'water':
+    case 'faucet':
+    case 'fountain':
+    case 'flush':
       return <Droplets className="w-16 h-16 mx-auto" />;
     default:
       return null;
@@ -22,17 +28,14 @@ export const ComponentCard = ({ component, onClick }) => {
     switch (status) {
       case 'critical':
         return {
-          background: 'bg-red-100',
           icon: 'text-red-600'
         };
       case 'warning':
         return {
-          background: 'bg-yellow-100',
           icon: 'text-yellow-600'
         };
       default:
         return {
-          background: 'bg-green-100',
           icon: 'text-green-600'
         };
     }
@@ -54,10 +57,15 @@ export const ComponentCard = ({ component, onClick }) => {
     >
       <CardContent className="p-4">
         <div className={`${statusColors.icon} mb-2`}>
-          {getIcon(component.name)}
+          {getIcon(component.category_name)}
         </div>
-        <h3 className="text-center font-semibold">{component.name}</h3>
-        <p className="text-center text-sm text-gray-600">{component.usage} units</p>
+        <h3 className="text-center font-semibold">{component.category_name}</h3>
+        <p className="text-center text-sm text-gray-600">
+          {component.usage} {component.category_name?.toLowerCase().includes('water') ? 'Liters' : 'kWh'}
+        </p>
+        <p className="text-center text-sm mt-1">
+          {component.building_name}
+        </p>
       </CardContent>
     </Card>
   );
