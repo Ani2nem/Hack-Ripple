@@ -7,6 +7,7 @@ import { MaintenanceReminders } from '../components/dashboard/MaintenanceReminde
 import { ComponentCard } from '../components/dashboard/ComponentCard';
 import { TimelineCalendar } from '../components/dashboard/TimelineCalendar';
 import ElectricityView from './ElectricityView';
+import WaterView from './WaterView'; 
 
 const Dashboard = () => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -26,7 +27,7 @@ const Dashboard = () => {
   }
 
   if (currentView === 'water') {
-    return <div>Water Detail View</div>;
+    return <WaterView onBack={() => setCurrentView('dashboard')} />;
   }
   
   return (
