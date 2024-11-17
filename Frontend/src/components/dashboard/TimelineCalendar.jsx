@@ -21,13 +21,12 @@ export const TimelineCalendar = ({ data }) => {
             <tr key={hour}>
               <td className="border p-2">{hour}:00</td>
               {days.map(day => (
-                <td key={`${day}-${hour}`} className="border p-2">
-                  {data[day]?.[hour]?.electricity && (
-                    <div className="text-blue-600">{data[day][hour].electricity}kW</div>
-                  )}
-                  {data[day]?.[hour]?.water && (
-                    <div className="text-green-600">{data[day][hour].water}L</div>
-                  )}
+                <td key={`${day}-${hour}`} className="border p-2 h-8">
+                  <div className="w-full h-6">
+                    {data[day]?.[hour]?.electricity === 1 && (
+                      <div className="w-full h-full bg-green-600" />
+                    )}
+                  </div>
                 </td>
               ))}
             </tr>
