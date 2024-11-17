@@ -1,5 +1,6 @@
-// src/pages/Dashboard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import API_BASE_URL from '../api/apiConfig'; // Import centralized API config
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { UsageRing } from '../components/dashboard/UsageRing';
 import { PeriodToggle } from '../components/dashboard/PeriodToggle';
@@ -7,12 +8,56 @@ import { MaintenanceReminders } from '../components/dashboard/MaintenanceReminde
 import { ComponentCard } from '../components/dashboard/ComponentCard';
 import { TimelineCalendar } from '../components/dashboard/TimelineCalendar';
 import ElectricityView from './ElectricityView';
-import WaterView from './WaterView'; 
+import WaterView from './WaterView';
 
 const Dashboard = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [period, setPeriod] = useState('weekly');
-  
+  const [usageSummary, setUsageSummary] = useState({ electricity: {}, water: {} });
+  const [reminders, setReminders] = useState([]);
+  const [criticalComponents, setCriticalComponents] = useState([]);
+
+  useEffect(() => {
+    // Fetch usage summary for electricity and water
+    axios.get(`${API_BASE_URL}/categories/summary?type=electrical`)
+      .then((response) => {
+        const electricityData = response.data.reduce((acc, item) => {
+          acc.usage = (acc.usage || 0) + item.total_usage;
+          acc.goal = (acc.goal || 0) + item.total_goal;
+          acc.savings = ((acc.goal - acc.usage) / acc.goal) * 100; // Calculate percentage savings
+          return acc;
+        }, {});
+        setUsageSummary((prev) => ({ ...prev, electricity: electricityData }));
+      })
+      .catch((error) => console.error("Error fetching electricity summary:", error));
+
+    axios.get(`${API_BASE_URL}/categories/summary?type=water`)
+      .then((response) => {
+        const waterData = response.data.reduce((acc, item) => {
+          acc.usage = (acc.usage || 0) + item.total_usage;
+          acc.goal = (acc.goal || 0) + item.total_goal;
+          acc.savings = ((acc.goal - acc.usage) / acc.goal) * 100; // Calculate percentage savings
+          return acc;
+        }, {});
+        setUsageSummary((prev) => ({ ...prev, water: waterData }));
+      })
+      .catch((error) => console.error("Error fetching water summary:", error));
+
+    // Fetch maintenance reminders
+    axios.get(`${API_BASE_URL}/reminders/sorted/1`) // Replace "1" with dynamic building_id if needed
+      .then((response) => {
+        setReminders(response.data);
+      })
+      .catch((error) => console.error("Error fetching reminders:", error));
+
+    // Fetch critical components
+    axios.get(`${API_BASE_URL}/resources/electrical/over-limit`)
+      .then((response) => {
+        setCriticalComponents(response.data.slice(0, 3)); // Limit to top 3 overused resources
+      })
+      .catch((error) => console.error("Error fetching critical components:", error));
+  }, []);
+
   const handleCardClick = (view) => {
     setCurrentView(view);
   };
@@ -21,7 +66,6 @@ const Dashboard = () => {
     console.log(`Clicked ${component.name}`);
   };
 
-  // Return ElectricityView when electricity view is selected
   if (currentView === 'electricity') {
     return <ElectricityView onBack={() => setCurrentView('dashboard')} />;
   }
@@ -29,7 +73,7 @@ const Dashboard = () => {
   if (currentView === 'water') {
     return <WaterView onBack={() => setCurrentView('dashboard')} />;
   }
-  
+
   return (
     <>
       <PeriodToggle value={period} onValueChange={setPeriod} />
@@ -45,7 +89,12 @@ const Dashboard = () => {
               <CardTitle>Electricity</CardTitle>
             </CardHeader>
             <CardContent>
-              <UsageRing type="Electricity" usage={150} threshold={200} savings={-25} />
+              <UsageRing 
+                type="Electricity" 
+                usage={usageSummary.electricity.usage || 0} 
+                threshold={usageSummary.electricity.goal || 0} 
+                savings={usageSummary.electricity.savings || 0} 
+              />
             </CardContent>
           </Card>
         </div>
@@ -58,18 +107,21 @@ const Dashboard = () => {
               <CardTitle>Water</CardTitle>
             </CardHeader>
             <CardContent>
-              <UsageRing type="Water" usage={80} threshold={100} savings={15} />
+              <UsageRing 
+                type="Water" 
+                usage={usageSummary.water.usage || 0} 
+                threshold={usageSummary.water.goal || 0} 
+                savings={usageSummary.water.savings || 0} 
+              />
             </CardContent>
           </Card>
         </div>
         <div className="col-span-4">
-          <MaintenanceReminders
-            reminders={[
-              { id: 1, item: 'AC Filter Change', status: 'critical' },
-              { id: 2, item: 'Light Bulb Replace', status: 'warning' },
-              { id: 3, item: 'Water Filter', status: 'normal' },
-            ]}
-          />
+          <MaintenanceReminders reminders={reminders.map(reminder => ({
+            id: reminder.id,
+            item: reminder.title,
+            status: reminder.status
+          }))} />
         </div>
       </div>
 
@@ -77,30 +129,17 @@ const Dashboard = () => {
       <section>
         <h2 className="text-2xl font-bold mb-4">Critical Components</h2>
         <div className="grid grid-cols-3 gap-6">
-          <ComponentCard 
-            component={{
-              name: 'HVAC System',
-              usage: 250,
-              status: 'warning'
-            }}
-            onClick={handleComponentClick}
-          />
-          <ComponentCard 
-            component={{
-              name: 'Lighting',
-              usage: 180,
-              status: 'normal'
-            }}
-            onClick={handleComponentClick}
-          />
-          <ComponentCard 
-            component={{
-              name: 'Water System',
-              usage: 320,
-              status: 'critical'
-            }}
-            onClick={handleComponentClick}
-          />
+          {criticalComponents.map(component => (
+            <ComponentCard 
+              key={component.resource_id}
+              component={{
+                name: component.category_name,
+                usage: component.usage,
+                status: component.percent_over > 0 ? 'critical' : 'normal'
+              }}
+              onClick={handleComponentClick}
+            />
+          ))}
         </div>
       </section>
 
