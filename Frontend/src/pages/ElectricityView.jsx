@@ -51,6 +51,16 @@ const CategoryCard = ({ category, usage, thresholdScore }) => {
   );
 };
 
+const getResourceName = (resourceId) => {
+  // Extract meaningful name from resource ID or use a mapping
+  // This assumes your resource_id contains or maps to meaningful names
+  // Example: "bathroom_faucet_1" -> "Bathroom Faucet 1"
+  return resourceId
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 const CriticalComponentCard = ({ component, onClick }) => {
   const { background, text } = getResourceStatus(component.percent_over);
   
@@ -64,9 +74,11 @@ const CriticalComponentCard = ({ component, onClick }) => {
           <div className={text}>
             {getCategoryIcon(component.category_name)}
           </div>
-          <h4 className="font-semibold text-gray-900">{component.category_name}</h4>
+          <h4 className="font-semibold text-gray-900">
+            {getResourceName(component.resource_id)}
+          </h4>
           <p className="text-sm text-gray-600">
-            Usage: {component.usage} kWh
+            Usage: {component.usage} Liters
           </p>
           <p className={text}>
             {component.percent_over <= 0 
@@ -117,8 +129,8 @@ const ElectricityView = ({ onBack, selectedBuilding }) => {
       setIsLoading(true);
       try {
         const [categoriesData, resourcesData] = await Promise.all([
-          fetchCategorySummary('electrical', selectedBuilding), // or 'water' for WaterView
-          fetchCriticalResources('electrical', selectedBuilding)  // or 'water' for WaterView
+          fetchCategorySummary('electrical', selectedBuilding), 
+          fetchCriticalResources('electrical', selectedBuilding)  
         ]);
   
         setCategories(categoriesData); // Store all categories

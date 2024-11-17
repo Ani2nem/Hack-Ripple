@@ -59,34 +59,46 @@ const CategoryCard = ({ category, usage, thresholdScore }) => {
   );
 };
 
-const CriticalComponentCard = ({ component, onClick }) => {
-  const { background, text } = getResourceStatus(component.percent_over);
+const getResourceName = (resourceId) => {
+    // Extract meaningful name from resource ID or use a mapping
+    // This assumes your resource_id contains or maps to meaningful names
+    // Example: "bathroom_faucet_1" -> "Bathroom Faucet 1"
+    return resourceId
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
   
-  return (
-    <Card 
-      className={`${background} cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg border`}
-      onClick={() => onClick(component)}
-    >
-      <CardContent className="p-4">
-        <div className="flex flex-col items-center space-y-2">
-          <div className={text}>
-            {getCategoryIcon(component.category_name)}
+  const CriticalComponentCard = ({ component, onClick }) => {
+    const { background, text } = getResourceStatus(component.percent_over);
+    
+    return (
+      <Card 
+        className={`${background} cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg border`}
+        onClick={() => onClick(component)}
+      >
+        <CardContent className="p-4">
+          <div className="flex flex-col items-center space-y-2">
+            <div className={text}>
+              {getCategoryIcon(component.category_name)}
+            </div>
+            <h4 className="font-semibold text-gray-900">
+              {getResourceName(component.resource_id)}
+            </h4>
+            <p className="text-sm text-gray-600">
+              Usage: {component.usage} Liters
+            </p>
+            <p className={text}>
+              {component.percent_over <= 0 
+                ? `${Math.abs(component.percent_over).toFixed(1)}% Below Threshold`
+                : `${component.percent_over.toFixed(1)}% Over Threshold`
+              }
+            </p>
           </div>
-          <h4 className="font-semibold text-gray-900">{component.category_name}</h4>
-          <p className="text-sm text-gray-600">
-            Usage: {component.usage} Liters
-          </p>
-          <p className={text}>
-            {component.percent_over <= 0 
-              ? `${Math.abs(component.percent_over).toFixed(1)}% Below Threshold`
-              : `${component.percent_over.toFixed(1)}% Over Threshold`
-            }
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+        </CardContent>
+      </Card>
+    );
+  };
 
 const WaterView = ({ onBack, selectedBuilding }) => {
   const [categories, setCategories] = useState([]);
@@ -101,8 +113,8 @@ const WaterView = ({ onBack, selectedBuilding }) => {
       setIsLoading(true);
       try {
         const [categoriesData, resourcesData] = await Promise.all([
-          fetchCategorySummary('electrical', selectedBuilding), // or 'water' for WaterView
-          fetchCriticalResources('electrical', selectedBuilding)  // or 'water' for WaterView
+          fetchCategorySummary('water', selectedBuilding),
+          fetchCriticalResources('water', selectedBuilding)  
         ]);
   
         setCategories(categoriesData); // Store all categories
